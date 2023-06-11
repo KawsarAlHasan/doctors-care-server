@@ -27,6 +27,7 @@ async function run() {
       .db("doctorsCare")
       .collection("appointmentOptions");
     const bookingsCollection = client.db("doctorsCare").collection("bookings");
+    const usersCollection = client.db("doctorsCare").collection("users");
 
     // get appointment Option
     app.get("/appointmentOptions", async (req, res) => {
@@ -53,6 +54,15 @@ async function run() {
       res.send(options);
     });
 
+    // get booking
+    app.get("/bookings", async (req, res) => {
+      const email = req.query.email;
+
+      const query = { email: email };
+      const bookings = await bookingsCollection.find(query).toArray();
+      res.send(bookings);
+    });
+
     // booking post
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
@@ -70,6 +80,12 @@ async function run() {
       }
 
       const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
   } finally {
