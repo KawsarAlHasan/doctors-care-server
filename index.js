@@ -11,7 +11,6 @@ app.use(cors());
 app.use(express.json());
 
 // mongodb connection
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aydlau6.mongodb.net/?retryWrites=true&w=majority`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,6 +28,7 @@ async function run() {
       .collection("appointmentOptions");
     const bookingsCollection = client.db("doctorsCare").collection("bookings");
 
+    // get appointment Option
     app.get("/appointmentOptions", async (req, res) => {
       const date = req.query.date;
       const query = {};
@@ -39,7 +39,6 @@ async function run() {
         .find(bookingQuery)
         .toArray();
 
-      // code carefully :D
       options.forEach((option) => {
         const optionBooked = alreadyBooked.filter(
           (book) => book.treatment === option.name
@@ -54,8 +53,22 @@ async function run() {
       res.send(options);
     });
 
+    // booking post
     app.post("/bookings", async (req, res) => {
       const booking = req.body;
+      const query = {
+        appointmentDate: booking.appointmentDate,
+        email: booking.email,
+        treatment: booking.treatment,
+      };
+
+      const alreadyBooked = await bookingsCollection.find(query).toArray();
+
+      if (alreadyBooked.length) {
+        const message = `You already have a booking on ${booking.appointmentDate}`;
+        return res.send({ acknowledged: false, message });
+      }
+
       const result = await bookingsCollection.insertOne(booking);
       res.send(result);
     });
