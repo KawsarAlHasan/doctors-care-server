@@ -40,18 +40,6 @@ function verifyJWT(req, res, next) {
   });
 }
 
-// verify admin json web token
-// const verifyAdmin = async (req, res, next) => {
-//   const decodedEmail = req.decoded.email;
-//   const query = { email: decodedEmail };
-//   const user = await usersCollection.findOne(query);
-
-//   if (user?.role !== "admin") {
-//     return res.status(403).send({ message: "forbidden access" });
-//   }
-//   next();
-// };
-
 async function run() {
   try {
     const appointmentOptionCollection = client
@@ -125,7 +113,7 @@ async function run() {
       const user = await usersCollection.findOne(query);
       if (user) {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
-          expiresIn: "1h",
+          expiresIn: "365d",
         });
         return res.send({ accessToken: token });
       }
@@ -137,6 +125,13 @@ async function run() {
       const query = {};
       const users = await usersCollection.find(query).toArray();
       res.send(users);
+    });
+
+    app.get("/users/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const user = await usersCollection.findOne(query);
+      res.send({ isAdmin: user?.role === "admin" });
     });
 
     // users create
