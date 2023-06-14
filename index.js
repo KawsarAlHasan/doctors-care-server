@@ -47,6 +47,7 @@ async function run() {
       .collection("appointmentOptions");
     const bookingsCollection = client.db("doctorsCare").collection("bookings");
     const usersCollection = client.db("doctorsCare").collection("users");
+    const doctorsCollection = client.db("doctorsCare").collection("doctors");
 
     // get appointment Option
     app.get("/appointmentOptions", async (req, res) => {
@@ -71,6 +72,16 @@ async function run() {
       });
 
       res.send(options);
+    });
+
+    // get appointment specialty
+    app.get("/appointmentSpecialty", async (req, res) => {
+      const query = {};
+      const result = await appointmentOptionCollection
+        .find(query)
+        .project({ name: 1 })
+        .toArray();
+      res.send(result);
     });
 
     // get booking
@@ -164,6 +175,13 @@ async function run() {
         updatedDoc,
         options
       );
+      res.send(result);
+    });
+
+    // create doctors
+    app.post("/doctors", verifyJWT, async (req, res) => {
+      const doctor = req.body;
+      const result = await doctorsCollection.insertOne(doctor);
       res.send(result);
     });
 
