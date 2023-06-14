@@ -178,10 +178,25 @@ async function run() {
       res.send(result);
     });
 
+    // get doctors
+    app.get("/doctors", verifyJWT, async (req, res) => {
+      const query = {};
+      const doctors = await doctorsCollection.find(query).toArray();
+      res.send(doctors);
+    });
+
     // create doctors
     app.post("/doctors", verifyJWT, async (req, res) => {
       const doctor = req.body;
       const result = await doctorsCollection.insertOne(doctor);
+      res.send(result);
+    });
+
+    // delete doctors
+    app.delete("/doctors/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await doctorsCollection.deleteOne(filter);
       res.send(result);
     });
 
